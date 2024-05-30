@@ -49,7 +49,7 @@ void shuffle(int *array, size_t n) {
 
 
 // funcion auxiliar que cancela los hijos
-void send_termination_signals() {
+void cancel_children() {
     int indices[NUM_CHILDREN];
     for (int i = 0; i < NUM_CHILDREN; i++) {
         indices[i] = i;
@@ -71,7 +71,7 @@ int main() {
     create_children();
     sleep(3);
     // empezar a cancelar los hijos
-    send_termination_signals();
+    cancel_children();
 
     printf("\n Todos los hijos han sido cancelados");
     return 0;
