@@ -7,19 +7,26 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
-void write_file(int sockfd, const char *filename) {
+void write_file(int sockfd) {
     int n;
     FILE *fp;
+    // El programa solo funciona si se solicitan otros archivos .txt
+    char *filename = "archivo_recibido.txt";
     char buffer[BUFFER_SIZE];
 
-    fp = fopen(filename, "wb");
+    fp = fopen(filename, "w");
     if (fp == NULL) {
         perror("Error al crear el archivo");
         exit(1);
     }
 
-    while ((n = recv(sockfd, buffer, BUFFER_SIZE, 0)) > 0) {
-        fwrite(buffer, 1, n, fp);
+    while (1) {
+        n = recv(sockfd, buffer, BUFFER_SIZE, 0);
+        if (n <= 0) {
+            break;
+        }
+        fprintf(fp, "%s", buffer);
+        bzero(buffer, BUFFER_SIZE);
     }
     fclose(fp);
 }
@@ -49,10 +56,10 @@ int main() {
         exit(1);
     }
 
-    // Enviar el nombre del archivo al servidor
+    // Enviar el nombre del archivo al servidor, debe ser solo .txt 
     send(sockfd, filename, strlen(filename), 0);
 
-    write_file(sockfd, "received_file");
+    write_file(sockfd);
     printf("Archivo recibido exitosamente \n");
 
     close(sockfd);

@@ -8,14 +8,14 @@
 #define BUFFER_SIZE 1024
 
 void send_file(FILE *fp, int sockfd) {
-    char data[BUFFER_SIZE];
-    size_t n;
+    char data[BUFFER_SIZE] = {0};
 
-    while ((n = fread(data, 1, BUFFER_SIZE, fp)) > 0) {
-        if (send(sockfd, data, n, 0) == -1) {
+    while (fgets(data, BUFFER_SIZE, fp) != NULL) {
+        if (send(sockfd, data, sizeof(data), 0) == -1) {
             perror("Error al enviar el archivo");
             exit(1);
         }
+        bzero(data, BUFFER_SIZE);
     }
 }
 
@@ -41,10 +41,9 @@ int main() {
         exit(1);
     }
 
-    if (listen(sockfd, 10) < 0) {
+    if (listen(sockfd, 10) != 0) {
         perror("Error al escuchar el puerto");
-        close(sockfd);
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     addr_size = sizeof(new_addr);
@@ -54,13 +53,11 @@ int main() {
         exit(1);
     }
 
-    printf("Servidor activo en el puerto:  %d\n", PORT);
-
     // Recibir el nombre del archivo del cliente
     recv(new_sock, buffer, BUFFER_SIZE, 0);
     printf("El cliente solicitó el archivo: %s\n", buffer);
 
-    fp = fopen(buffer, "rb");
+    fp = fopen(buffer, "r");
     if (fp == NULL) {
         perror("Error al abrir el archivo solicitado");
         exit(1);
@@ -69,7 +66,6 @@ int main() {
     send_file(fp, new_sock);
     printf("Archivo enviado satisfactoriamente al cliente \n");
 
-    fclose(fp);
     close(new_sock);
     close(sockfd);
 
