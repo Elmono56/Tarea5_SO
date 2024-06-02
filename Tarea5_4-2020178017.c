@@ -41,9 +41,9 @@ int main() {
         exit(1);
     }
 
-    if (listen(server_socket, 10) < 0) {
+    if (listen(sockfd, 10) < 0) {
         perror("Error al escuchar el puerto");
-        close(server_socket);
+        close(sockfd);
         exit(EXIT_FAILURE);
     }
 
